@@ -103,7 +103,7 @@ def fill_grid(grid):
   grid[row][col]=0           
 
 def generare_sudoku_rezolvabil():
- global lista_numere, counter
+ global lista_numere, counter,grid
  lista_numere=[1,2,3,4,5,6,7,8,9]
  grid = []
  for i in range(9):
@@ -120,21 +120,15 @@ def generare_sudoku_rezolvabil():
     col = randint(0,8) 
   backup = grid[row][col]
   grid[row][col]=0
-  
-  #Take a full copy of the grid
   copyGrid = []
   for r in range(0,9):
      copyGrid.append([])
      for c in range(0,9):
         copyGrid[r].append(grid[r][c])
-  
-  #Count the number of solutions that this grid has (using a backtracking approach implemented in the solveGrid() function)
   counter=0      
   solve_grid(copyGrid)   
-  #If the number of solution is different from 1 then we need to cancel the change by putting the value we took away back in the grid
   if counter!=1:
     grid[row][col]=backup
-    #We could stop here, but we can also have another attempt with a different cell just to try to remove more numbers
     attempts -= 1
  print(grid)
   
@@ -144,9 +138,12 @@ def start_game(game_grid):
  game_grid.destroy()
  game_grid = Tk()
  game_grid.title("Sudoku")
- l1 = Button(game_grid, text="Sudoku", width=10)
- l1.grid(row=1, column=1)
- pass
+ label1p = Label(game_grid, text="Sudoku Time Remaining:", font="arial, 50", borderwidth=3, relief="flat")
+ for i in range(len(grid)):
+  for j in range(len(grid)):
+    e = Entry(width=5, fg='red',font=('Arial',15,'bold'))
+    e.grid(row=i, column=j)
+    e.insert(END,(grid[i][j]))
 
 def start():
  window = Tk()
