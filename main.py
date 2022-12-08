@@ -145,12 +145,24 @@ def setare_valori_timer(minute,second):
   minute.set("10")
   second.set("00")
  if get_variabila_dificultate() == 3:
-  minute.set("05")
-  second.set("00")
+  minute.set("00")
+  second.set("05")
  set_temp(minute,second)
 
 def distruge(x):
  x.destroy()
+
+def when_clicked(i,j):
+  if buton_valabil(i,j) == True:
+    print("ceva")
+
+
+def buton_valabil(i,j):
+  if grid[i][j] == 0:
+    return True
+
+def switch(b):
+    b["state"] = DISABLED
 
 def start_game():
  generare_sudoku_rezolvabil()
@@ -184,21 +196,23 @@ def start_game():
  minute=StringVar()
  second=StringVar()
  setare_valori_timer(minute,second)
- minuteLabel= Label(game_grid, font=("Arial",15,""),textvariable=minute)
- minuteLabel.pack(side=LEFT,expand=YES)
- secondLabel= Label(game_grid, font=("Arial",15,""), textvariable=second)
- secondLabel.pack(side=LEFT,expand=YES)
  global temp
  while temp >-1:
+  minuteLabel= Label(game_grid, font=("Arial",15,""),textvariable=minute)
+  minuteLabel.pack(side=LEFT,expand=YES)
+  secondLabel= Label(game_grid, font=("Arial",15,""), textvariable=second)
+  secondLabel.pack(side=LEFT,expand=YES)
   mins,secs = divmod(temp,60)
   minute.set("{0:2d}".format(mins))
   second.set("{0:2d}".format(secs))
   game_grid.update()
   time.sleep(1)
-  if (temp == 0):
-            messagebox.showinfo("Time Countdown", "Time's up ")
+  if 'normal' == game_grid.state():
+   if (temp == 0):
+    messagebox.showinfo("Sudoku Time Countdown", "Time's up, you've lost!")
   temp -= 1
- game_grid.mainloop()
+ 
+  game_grid.mainloop()
 
 def setare_variabila_dificultate(x):
  global dificultate
