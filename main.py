@@ -132,27 +132,34 @@ def generare_sudoku_rezolvabil():
     grid[row][col]=backup
     attempts -= 1
  print(grid)
+
+def set_temp(minute,second):
+  global temp
+  temp = int(minute.get())*60 + int(second.get())
   
+def setare_valori_timer(minute,second):
+ if get_variabila_dificultate() == 1:
+  minute.set("20")
+  second.set("00")
+ if get_variabila_dificultate() == 2:
+  minute.set("10")
+  second.set("00")
+ if get_variabila_dificultate() == 3:
+  minute.set("05")
+  second.set("00")
+ set_temp(minute,second)
+
 def distruge(x):
  x.destroy()
 
 def start_game():
  generare_sudoku_rezolvabil()
+ global game_grid
  game_grid = Tk()
  game_grid.title("Sudoku")
  game_grid.geometry("500x500")
  puzzle = Frame(game_grid, bg='white')
  puzzle.pack()
- hour=StringVar()
- minute=StringVar()
- second=StringVar()
- hour.set("00")
- minute.set("00")
- second.set("00")
- hourEntry= Entry(game_grid, width=3, font=("Arial",18,""),textvariable=hour)
- minuteEntry= Entry(game_grid, width=3, font=("Arial",18,""),textvariable=minute)
- secondEntry= Entry(game_grid, width=3, font=("Arial",18,""),textvariable=second)
- label1p = Label(game_grid, text="Sudoku Time Remaining:", font="arial, 25", borderwidth=3, relief="flat")
  blocks = [] 
  for r in range(3):
     row = []
@@ -172,45 +179,26 @@ def start_game():
         btn_cells[i][j] = Button(frm_cell, relief='ridge', bg='white', textvariable=var)
         btn_cells[i][j].grid(sticky='nsew')
         var.set(grid[i][j])
- label1p.pack()
- hourEntry.pack()
- minuteEntry.pack()
- secondEntry.pack()
- temp = 0*3600 + 0*60 + 5
+ timeLabel= Label(game_grid, font=("Arial",15,""),text="Sudoku Time Remaining: ")
+ timeLabel.pack(side=LEFT,expand=YES)
+ minute=StringVar()
+ second=StringVar()
+ setare_valori_timer(minute,second)
+ minuteLabel= Label(game_grid, font=("Arial",15,""),textvariable=minute)
+ minuteLabel.pack(side=LEFT,expand=YES)
+ secondLabel= Label(game_grid, font=("Arial",15,""), textvariable=second)
+ secondLabel.pack(side=LEFT,expand=YES)
+ global temp
  while temp >-1:
-        mins,secs = divmod(temp,60)
-  
-        # Converting the input entered in mins or secs to hours,
-        # mins ,secs(input = 110 min --> 120*60 = 6600 => 1hr :
-        # 50min: 0sec)
-        hours=0
-        if mins >60:
-             
-            # divmod(firstvalue = temp//60, secondvalue
-            # = temp%60)
-            hours, mins = divmod(mins, 60)
-         
-        # using format () method to store the value up to
-        # two decimal places
-        hour.set("{0:2d}".format(hours))
-        minute.set("{0:2d}".format(mins))
-        second.set("{0:2d}".format(secs))
-  
-        # updating the GUI window after decrementing the
-        # temp value every time
-        game_grid.update()
-        time.sleep(1)
-  
-        # when temp value = 0; then a messagebox pop's up
-        # with a message:"Time's up"
-        if (temp == 0):
-            messagebox.showinfo("Sudoku Time Countdown", "Time's up, you've lost ")
-            distruge(game_grid)
-            start_menu()
-         
-        # after every one sec the value of temp will be decremented
-        # by one
-        temp -= 1
+  mins,secs = divmod(temp,60)
+  minute.set("{0:2d}".format(mins))
+  second.set("{0:2d}".format(secs))
+  game_grid.update()
+  time.sleep(1)
+  if (temp == 0):
+            messagebox.showinfo("Time Countdown", "Time's up ")
+  temp -= 1
+ game_grid.mainloop()
 
 def setare_variabila_dificultate(x):
  global dificultate
@@ -222,6 +210,7 @@ def get_variabila_dificultate():
 def add_label():
    global label
    label=Label(window, text="Default Difficulty: Easy", font=('Aerial 18'))
+   setare_variabila_dificultate(1)
    label.pack()
 
 def update_label1():
