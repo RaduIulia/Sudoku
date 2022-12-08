@@ -206,35 +206,64 @@ def start_game():
         if (temp == 0):
             messagebox.showinfo("Sudoku Time Countdown", "Time's up, you've lost ")
             distruge(game_grid)
-            start()
+            start_menu()
          
         # after every one sec the value of temp will be decremented
         # by one
         temp -= 1
 
-def start():
+def setare_variabila_dificultate(x):
+ global dificultate
+ dificultate = x
+
+def get_variabila_dificultate():
+ return dificultate
+
+def add_label():
+   global label
+   label=Label(window, text="Default Difficulty: Easy", font=('Aerial 18'))
+   label.pack()
+
+def update_label1():
+   global label
+   label["text"]="Difficulty Chosen: Easy"
+   setare_variabila_dificultate(1)
+
+def update_label2():
+   global label
+   label["text"]="Difficulty Chosen: Medium"
+   setare_variabila_dificultate(2)
+
+def update_label3():
+   global label
+   label["text"]="Difficulty Chosen: Hard"
+   setare_variabila_dificultate(3)
+
+def start_menu():
+ global window
  window = Tk()
  window.title("Sudoku")
  window.geometry("500x500")
  label1 = Label(window, text="Sudoku", font="arial, 50",width=10, height=2, borderwidth=3, relief="flat")
  button_start = Button(window, text ="Start", command = lambda: [distruge(window),start_game()], width = 500, font = 'summer, 25', bd = 10)
  label2= Label(window, text = "Select the difficulty below :  ", font = ("Times New Roman", 30), padx = 10, pady = 10)
- list = Listbox(window, selectmode = "single")
- x =["Easy", "Medium", "Hard"]
- for each_item in range(len(x)):
-    list.insert(END, x[each_item])
-    list.itemconfig(each_item)
+ R1 = Radiobutton(window, text="Easy",background="white", activebackground="red",indicatoron = 0,font=30,command=update_label1)
+ R2 = Radiobutton(window, text="Medium",background="white", activebackground="red",indicatoron = 0,font=30,command=update_label2)
+ R3 = Radiobutton(window, text="Hard",background="white", activebackground="red",indicatoron = 0,font=30,command=update_label3)
  label1.pack()
  button_start.pack()
  label2.pack()
- list.pack(padx = 10, pady = 10, fill = "both")
+ R1.pack()
+ R2.pack()
+ R3.pack()
+ add_label()
  window.mainloop()
 
-def sudoku():
- start()
+def sudoku_game():
+ start_menu()
 
 def main():
- sudoku()
+ sudoku_game()
 
 if __name__ == '__main__':
     main()
