@@ -150,20 +150,17 @@ def setare_valori_timer(minute,second):
   second.set("05")
  set_temp(minute,second)
 
-def distruge(x):
- x.destroy()
+def grid_checker():
+ for row in range(9):
+  for col in range(9):
+    if board[row][col].get() not in ['1','2','3','4','5','6','7','8','9']:
+        board[row][col].set('')
 
-def when_clicked(i,j):
-  if buton_valabil(i,j) == True:
-    print("ceva")
-
-
-def buton_valabil(i,j):
-  if grid[i][j] == 0:
-    return True
-
-def switch(b):
-    b["state"] = DISABLED
+def clear():
+ for row in range(9):
+  for col in range(9):
+    if copy_grid[row][col] == 0:
+     board[row][col].delete(0, END)
 
 def add_label_timer(game_grid):
  timer = Frame(game_grid, bg='white')
@@ -180,12 +177,16 @@ def add_label_timer(game_grid):
 def add_butoane(game_grid):
  butoane = Frame(game_grid, bg='white')
  butoane.pack()
- button_clear = Button(butoane, text ="Clear",  width = 50, font = 'summer, 20', bd = 5)
+ button_clear = Button(butoane, text ="Clear",  width = 50, font = 'summer, 20',command=clear, bd = 5)
  button_clear.pack()
  button_check = Button(butoane, text ="Check",  width = 50, font = 'summer, 20', bd = 5)
  button_check.pack()
 
-def desenat_sudoku(puzzle):
+def desenat_sudoku(game_grid):
+ global puzzle
+ puzzle = Frame(game_grid, bg='white')
+ puzzle.pack()
+ global board
  board  = []
  for i in range(1,10):
            board += [[0,0,0,0,0,0,0,0,0]]
@@ -202,11 +203,13 @@ def desenat_sudoku(puzzle):
                       highlightcolor = 'yellow', highlightthickness = 0, highlightbackground = 'black') 
    else:
     board[row][col] = Label(puzzle, width = 2, font = ('Arial', 20), bg = color, cursor = 'arrow', borderwidth = 2,
-                      highlightcolor = 'yellow', highlightthickness = 0, highlightbackground = 'black',text=grid[row][col]) 
+                      highlightcolor = 'yellow', highlightthickness = 0, highlightbackground = 'black',text=copy_grid[row][col]) 
    board[row][col].grid(row = row, column = col)
 
 def start_game(game_grid):
  generare_sudoku_rezolvabil()
+ global copy_grid
+ copy_grid = grid
  game_grid.destroy()
  game_grid = Tk()
  game_grid.title("Sudoku")
@@ -216,9 +219,7 @@ def start_game(game_grid):
  second=StringVar()
  setare_valori_timer(minute,second)
  add_label_timer(game_grid)
- puzzle = Frame(game_grid, bg='white')
- puzzle.pack()
- desenat_sudoku(puzzle)
+ desenat_sudoku(game_grid)
  add_butoane(game_grid)
  global temp
  if temp >-1:
