@@ -156,7 +156,11 @@ def clear():
      board[row][col].delete(0, END)
  grid = copy_grid
 
-def cd(timer_label_obj):
+def refresh(self):
+    self.destroy()
+    self.__init__()
+
+def cd(timer_label_obj,de_distrus):
  global temp,game_end
  while temp > 0:
   timer_label_obj.config(text="Sudoku Time Remaining: "+str(temp),font=("Arial", 25))
@@ -169,17 +173,17 @@ def cd(timer_label_obj):
    messagebox.showinfo("Time's up", "You didn't finish the Sudoku in time!")
   print(game_end)
   if game_end == True:
-   sudoku_game()
+    sudoku_game()
 
-def countdown(timerFrame):
+def countdown(timerFrame,de_distrus):
  timer = Label(timerFrame)
- th = threading.Thread(target=cd,args=[timer])
+ th = threading.Thread(target=cd,args=[timer,de_distrus])
  th.start()
 
 def add_label_timer(game_grid):
  timer = Frame(game_grid, bg='white')
  timer.pack()
- countdown(timer)
+ countdown(timer,game_grid)
  
 
 def emptyCell():
