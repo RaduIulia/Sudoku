@@ -4,6 +4,7 @@ import time
 from tkinter import messagebox
 from functools import partial
 import re 
+import threading
 
 def check_grid(grid):
   for row in range(0,9):
@@ -14,17 +15,13 @@ def check_grid(grid):
 
 def solve_grid(grid):
   global counter
-  #Find next empty cell
   for i in range(0,81):
     row=i//9
     col=i%9
     if grid[row][col]==0:
       for value in range (1,10):
-        #Check that this value has not already be used on this row
         if not(value in grid[row]):
-          #Check that this value has not already be used on this column
           if not value in (grid[0][col],grid[1][col],grid[2][col],grid[3][col],grid[4][col],grid[5][col],grid[6][col],grid[7][col],grid[8][col]):
-            #Identify which of the 9 squares we are working on
             square=[]
             if row<3:
               if col<3:
@@ -47,7 +44,6 @@ def solve_grid(grid):
                 square=[grid[i][3:6] for i in range(6,9)]
               else:  
                 square=[grid[i][6:9] for i in range(6,9)]
-            #Check that this value has not already be used on this 3x3 square
             if not value in (square[0] + square[1] + square[2]):
               grid[row][col]=value
               if check_grid(grid):
@@ -67,11 +63,8 @@ def fill_grid(grid):
     if grid[row][col]==0:
       shuffle(lista_numere)      
       for value in lista_numere:
-        #Check that this value has not already be used on this row
         if not(value in grid[row]):
-          #Check that this value has not already be used on this column
           if not value in (grid[0][col],grid[1][col],grid[2][col],grid[3][col],grid[4][col],grid[5][col],grid[6][col],grid[7][col],grid[8][col]):
-            #Identify which of the 9 squares we are working on
             square=[]
             if row<3:
               if col<3:
@@ -94,7 +87,6 @@ def fill_grid(grid):
                 square=[grid[i][3:6] for i in range(6,9)]
               else:  
                 square=[grid[i][6:9] for i in range(6,9)]
-            #Check that this value has not already be used on this 3x3 square
             if not value in (square[0] + square[1] + square[2]):
               grid[row][col]=value
               if check_grid(grid):
@@ -148,7 +140,7 @@ def setare_valori_timer(minute,second):
   second.set("00")
  if get_variabila_dificultate() == 3:
   minute.set("00")
-  second.set("05")
+  second.set("15")
  set_temp(minute,second)
 
 def grid_checker():
@@ -164,17 +156,31 @@ def clear():
      board[row][col].delete(0, END)
  grid = copy_grid
 
+def cd(timer_label_obj):
+ global temp,game_end
+ while temp > 0:
+  timer_label_obj.config(text="Sudoku Time Remaining: "+str(temp),font=("Arial", 25))
+  temp-=1
+  timer_label_obj.pack()
+  time.sleep(1)
+  if temp ==0:
+   game_end = True
+   timer_label_obj.destroy()
+   messagebox.showinfo("Time's up", "You didn't finish the Sudoku in time!")
+  print(game_end)
+  if game_end == True:
+   sudoku_game()
+
+def countdown(timerFrame):
+ timer = Label(timerFrame)
+ th = threading.Thread(target=cd,args=[timer])
+ th.start()
+
 def add_label_timer(game_grid):
  timer = Frame(game_grid, bg='white')
  timer.pack()
- timeLabel= Label(timer, font=("Arial",15,""),text="Sudoku Time Remaining: ")
- timeLabel.pack(side=LEFT)
- mins_box = Label( timer,font=("Arial",15,""),textvariable=minute)
- mins_box.pack(side=LEFT)
- timeLabel= Label(timer, font=("Arial",15,""),text=":")
- timeLabel.pack(side=LEFT)
- sec_box = Label(timer, font=("Arial",15,""),textvariable=second)
- sec_box.pack(side=LEFT)
+ countdown(timer)
+ 
 
 def emptyCell():
  for row in range(9):
@@ -187,14 +193,8 @@ def isValidSudoku(board):
   N = 9
   global message
   message = ""
-   
-  # Check if all elements of board[][]
-  # stores value in the range[1, 9]
   for i in range(0, N):
     for j in range(0, N):
-       
-      # Check if board[i][j]
-      # lies in the range
       if ((board[i][j] <= 0) or
           (board[i][j] > 9)):
         if board[i][j] == 0:
@@ -203,99 +203,46 @@ def isValidSudoku(board):
         else:
           message = "Values out of 1-9 interval"
           return False
- 
-  # Stores unique value
-  # from 1 to N
   unique = [False] * (N + 1)
- 
-  # Traverse each row of
-  # the given array
   for i in range(0, N):
-     
-    # Initialize unique[]
-    # array to false
     for m in range(0, N + 1):
       unique[m] = False
- 
-    # Traverse each column
-    # of current row
     for j in range(0, N):
-       
-      # Stores the value
-      # of board[i][j]
       Z = board[i][j]
- 
-      # Check if current row
-      # stores duplicate value
       if (unique[Z] == True):
         message = "Duplicates on row "+str(i)
         return False
        
       unique[Z] = True
  
-  # Traverse each column of
-  # the given array
   for i in range(0, N):
-     
-    # Initialize unique[]
-    # array to false
     for m in range(0, N + 1):
       unique[m] = False
- 
-    # Traverse each row
-    # of current column
     for j in range(0, N):
        
-      # Stores the value
-      # of board[j][i]
       Z = board[j][i]
- 
-      # Check if current column
-      # stores duplicate value
       if (unique[Z] == True):
         message = "Duplicates on column "+str(j)
         return False
        
       unique[Z] = True
  
-  # Traverse each block of
-  # size 3 * 3 in board[][] array
   for i in range(0, N - 2, 3):
-     
-    # j stores first column of
-    # each 3 * 3 block
     for j in range(0, N - 2, 3):
        
-      # Initialize unique[]
-      # array to false
       for m in range(0, N + 1):
         unique[m] = False
- 
-      # Traverse current block
       for k in range(0, 3):
         for l in range(0, 3):
            
-          # Stores row number
-          # of current block
           X = i + k
- 
-          # Stores column number
-          # of current block
           Y = j + l
- 
-          # Stores the value
-          # of board[X][Y]
           Z = board[X][Y]
- 
-          # Check if current block
-          # stores duplicate value
           if (unique[Z] == True):
             message = "Duplicates in block"
             return False
            
           unique[Z] = True
-           
-  # If all conditions satisfied
   message = "You've solved Sudoku, congratulations!"
   return True
 
@@ -356,20 +303,10 @@ def desenat_sudoku(game_grid):
                       highlightcolor = 'yellow', highlightthickness = 0, highlightbackground = 'black',text=copy_grid[row][col]) 
    board[row][col].grid(row = row, column = col)
 
-def functie_timer(game_grid):
- global temp
- if temp >-1:
-  mins,secs = divmod(temp,60)
-  minute.set("{0:2d}".format(mins))
-  second.set("{0:2d}".format(secs))
-  game_grid.update()
-  time.sleep(1)
-  if (temp == 0):
-    messagebox.showinfo("Sudoku Time Countdown", "Time's up, you've lost!")
-  temp -= 1
-
 def start_game(game_grid):
  generare_sudoku_rezolvabil()
+ global game_end
+ game_end = False
  global copy_grid
  copy_grid = grid
  game_grid.destroy()
