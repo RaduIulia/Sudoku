@@ -3,6 +3,7 @@ from random import randint, shuffle
 import time
 from tkinter import messagebox
 from functools import partial
+import re 
 
 def check_grid(grid):
   for row in range(0,9):
@@ -161,6 +162,7 @@ def clear():
   for col in range(9):
     if copy_grid[row][col] == 0:
      board[row][col].delete(0, END)
+ grid = copy_grid
 
 def add_label_timer(game_grid):
  timer = Frame(game_grid, bg='white')
@@ -173,14 +175,159 @@ def add_label_timer(game_grid):
  timeLabel.pack(side=LEFT)
  sec_box = Label(timer, font=("Arial",15,""),textvariable=second)
  sec_box.pack(side=LEFT)
+
+def emptyCell():
+ for row in range(9):
+  for column in range(9):
+    if grid[row][column] == 0:
+      return (row,column)
+ return None
+
+def isValidSudoku(board):
+  N = 9
+  global message
+  message = ""
+   
+  # Check if all elements of board[][]
+  # stores value in the range[1, 9]
+  for i in range(0, N):
+    for j in range(0, N):
+       
+      # Check if board[i][j]
+      # lies in the range
+      if ((board[i][j] <= 0) or
+          (board[i][j] > 9)):
+        if board[i][j] == 0:
+          message = "Empty Cells"
+          return False
+        else:
+          message = "Values out of 1-9 interval"
+          return False
+ 
+  # Stores unique value
+  # from 1 to N
+  unique = [False] * (N + 1)
+ 
+  # Traverse each row of
+  # the given array
+  for i in range(0, N):
+     
+    # Initialize unique[]
+    # array to false
+    for m in range(0, N + 1):
+      unique[m] = False
+ 
+    # Traverse each column
+    # of current row
+    for j in range(0, N):
+       
+      # Stores the value
+      # of board[i][j]
+      Z = board[i][j]
+ 
+      # Check if current row
+      # stores duplicate value
+      if (unique[Z] == True):
+        message = "Duplicates on row "+str(i)
+        return False
+       
+      unique[Z] = True
+ 
+  # Traverse each column of
+  # the given array
+  for i in range(0, N):
+     
+    # Initialize unique[]
+    # array to false
+    for m in range(0, N + 1):
+      unique[m] = False
+ 
+    # Traverse each row
+    # of current column
+    for j in range(0, N):
+       
+      # Stores the value
+      # of board[j][i]
+      Z = board[j][i]
+ 
+      # Check if current column
+      # stores duplicate value
+      if (unique[Z] == True):
+        message = "Duplicates on column "+str(j)
+        return False
+       
+      unique[Z] = True
+ 
+  # Traverse each block of
+  # size 3 * 3 in board[][] array
+  for i in range(0, N - 2, 3):
+     
+    # j stores first column of
+    # each 3 * 3 block
+    for j in range(0, N - 2, 3):
+       
+      # Initialize unique[]
+      # array to false
+      for m in range(0, N + 1):
+        unique[m] = False
+ 
+      # Traverse current block
+      for k in range(0, 3):
+        for l in range(0, 3):
+           
+          # Stores row number
+          # of current block
+          X = i + k
+ 
+          # Stores column number
+          # of current block
+          Y = j + l
+ 
+          # Stores the value
+          # of board[X][Y]
+          Z = board[X][Y]
+ 
+          # Check if current block
+          # stores duplicate value
+          if (unique[Z] == True):
+            message = "Duplicates in block"
+            return False
+           
+          unique[Z] = True
+           
+  # If all conditions satisfied
+  message = "You've solved Sudoku, congratulations!"
+  return True
+
+def check_sudoku():
+ print(grid)
+ print(isValidSudoku(grid))
+ print(message)
+ if isValidSudoku(grid) == True :
+  messagebox.showinfo("Valid Sudoku", message)
+ else:
+  messagebox.showinfo("Invalid Sudoku", message)
+
  
 def add_butoane(game_grid):
  butoane = Frame(game_grid, bg='white')
  butoane.pack()
  button_clear = Button(butoane, text ="Clear",  width = 50, font = 'summer, 20',command=clear, bd = 5)
  button_clear.pack()
- button_check = Button(butoane, text ="Check",  width = 50, font = 'summer, 20', bd = 5)
+ button_check = Button(butoane, text ="Check",  width = 50, font = 'summer, 20',command=check_sudoku, bd = 5)
  button_check.pack()
+
+def callback(input):
+ regex = '[1-9]'
+ if re.search(regex,input):
+    print(input)
+    grid[row][col]=int(input)
+    return True
+ else:
+    print(input)
+    messagebox.showinfo("Incorrect Input", "Enter numbers ONLY!")
+    return False
+
 
 def desenat_sudoku(game_grid):
  global puzzle
@@ -190,6 +337,7 @@ def desenat_sudoku(game_grid):
  board  = []
  for i in range(1,10):
            board += [[0,0,0,0,0,0,0,0,0]]
+ global row,col
  for row in range(9):
   for col in range(9):
    if (row < 3 or row > 5) and (col < 3 or col > 5):
@@ -201,10 +349,24 @@ def desenat_sudoku(game_grid):
    if grid[row][col] == 0:
     board[row][col] = Entry(puzzle, width = 2, font = ('Arial', 20), bg = color, cursor = 'arrow', borderwidth = 2,
                       highlightcolor = 'yellow', highlightthickness = 0, highlightbackground = 'black') 
+    reg = puzzle.register(callback)
+    board[row][col].config(validate ='key', validatecommand =(reg, '%S'))
    else:
     board[row][col] = Label(puzzle, width = 2, font = ('Arial', 20), bg = color, cursor = 'arrow', borderwidth = 2,
                       highlightcolor = 'yellow', highlightthickness = 0, highlightbackground = 'black',text=copy_grid[row][col]) 
    board[row][col].grid(row = row, column = col)
+
+def functie_timer(game_grid):
+ global temp
+ if temp >-1:
+  mins,secs = divmod(temp,60)
+  minute.set("{0:2d}".format(mins))
+  second.set("{0:2d}".format(secs))
+  game_grid.update()
+  time.sleep(1)
+  if (temp == 0):
+    messagebox.showinfo("Sudoku Time Countdown", "Time's up, you've lost!")
+  temp -= 1
 
 def start_game(game_grid):
  generare_sudoku_rezolvabil()
@@ -221,17 +383,6 @@ def start_game(game_grid):
  add_label_timer(game_grid)
  desenat_sudoku(game_grid)
  add_butoane(game_grid)
- global temp
- if temp >-1:
-  mins,secs = divmod(temp,60)
-  minute.set("{0:2d}".format(mins))
-  second.set("{0:2d}".format(secs))
-  game_grid.update()
-  time.sleep(1)
-  if 'normal' == game_grid.state():
-   if (temp == 0):
-    messagebox.showinfo("Sudoku Time Countdown", "Time's up, you've lost!")
-  temp -= 1
  game_grid.mainloop()
 
 def setare_variabila_dificultate(x):
