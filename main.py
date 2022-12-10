@@ -97,14 +97,13 @@ def fill_grid(grid):
   grid[row][col]=0           
 
 def generare_sudoku_rezolvabil():
- global lista_numere, counter,grid
+ global lista_numere, counter,grid,attempts
  lista_numere=[1,2,3,4,5,6,7,8,9]
  grid = []
  for i in range(9):
   grid.append([0, 0, 0, 0, 0, 0, 0, 0, 0])
  fill_grid(grid)
  print(grid)
- attempts = 5 
  counter=1
  while attempts>0:
   row = randint(0,8)
@@ -241,10 +240,19 @@ def add_butoane(game_grid):
  button_check = Button(butoane, text ="Check",  width = 50, font = 'summer, 20',command=check_sudoku, bd = 5)
  button_check.pack()
 
+def creare_matrice_string():
+ global string_mat
+ string_mat = []
+ strs = ["" for x in range(9)]
+ for x in range(9):
+  string_mat.append(strs)
+ print(string_mat)
+
 def callback(input):
  regex = '[1-9]'
+ 
  if re.search(regex,input):
-    print(input)
+    #print(input)
     grid[row][col]=int(input)
     return True
  else:
@@ -270,15 +278,18 @@ def desenat_sudoku(game_grid):
       color = 'white'
    else:
       color = 'grey'
+   global var
+   var = StringVar()
    if grid[row][col] == 0:
     board[row][col] = Entry(puzzle, width = 2, font = ('Arial', 20), bg = color, cursor = 'arrow', borderwidth = 2,
-                      highlightcolor = 'yellow', highlightthickness = 0, highlightbackground = 'black') 
+                      highlightcolor = 'yellow',textvariable = var, highlightthickness = 0, highlightbackground = 'black') 
     reg = puzzle.register(callback)
     board[row][col].config(validate ='key', validatecommand =(reg, '%S'))
    else:
     board[row][col] = Label(puzzle, width = 2, font = ('Arial', 20), bg = color, cursor = 'arrow', borderwidth = 2,
                       highlightcolor = 'yellow', highlightthickness = 0, highlightbackground = 'black',text=copy_grid[row][col]) 
    board[row][col].grid(row = row, column = col)
+
 
 def start_countdown():
  global temp
@@ -294,6 +305,7 @@ def start_countdown():
 
 def start_game_2():
   window.destroy()
+  creare_matrice_string()
   generare_sudoku_rezolvabil()
   global copy_grid
   copy_grid = grid
@@ -322,25 +334,29 @@ def get_variabila_dificultate():
  return dificultate
 
 def add_label():
-   global label
+   global label,attempts
    label=Label(window, text="Default Difficulty: Easy", font=('Aerial 18'))
    setare_variabila_dificultate(1)
    label.pack()
+   attempts = 3
 
 def update_label1():
-   global label
+   global label,attempts
    label["text"]="Difficulty Chosen: Easy"
    setare_variabila_dificultate(1)
+   attempts = 3
 
 def update_label2():
-   global label
+   global label,attempts
    label["text"]="Difficulty Chosen: Medium"
    setare_variabila_dificultate(2)
+   attempts = 4
 
 def update_label3():
-   global label
+   global label,attempts
    label["text"]="Difficulty Chosen: Hard"
    setare_variabila_dificultate(3)
+   attempts = 5
 
 def start_menu():
  global window
@@ -359,6 +375,7 @@ def start_menu():
  R1.pack()
  R2.pack()
  R3.pack()
+ creare_matrice_string()
  add_label()
  window.mainloop()
 
