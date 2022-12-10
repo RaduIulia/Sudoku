@@ -1,9 +1,7 @@
 from tkinter import *
 from random import randint, shuffle
-import time
 from tkinter import messagebox
 import re 
-import threading
 
 def check_grid(grid):
   for row in range(0,9):
@@ -94,7 +92,14 @@ def fill_grid(grid):
                 if fill_grid(grid):
                   return True
       break
-  grid[row][col]=0           
+  grid[row][col]=0      
+
+def set_copy_grid(g):
+ global copy_grid
+ copy_grid = g
+
+def get_copy_grid():
+  return copy_grid
 
 def generare_sudoku_rezolvabil():
  global lista_numere, counter,grid,attempts
@@ -103,7 +108,6 @@ def generare_sudoku_rezolvabil():
  for i in range(9):
   grid.append([0, 0, 0, 0, 0, 0, 0, 0, 0])
  fill_grid(grid)
- print(grid)
  counter=1
  while attempts>0:
   row = randint(0,8)
@@ -123,7 +127,7 @@ def generare_sudoku_rezolvabil():
   if counter!=1:
     grid[row][col]=backup
     attempts -= 1
- print(grid)
+ set_copy_grid(grid)
 
 def set_temp(minute,second):
   global temp
@@ -146,13 +150,14 @@ def setare_valori_timer(minute,second):
  set_temp(minute,second)
 
 def clear():
+ global grid
+ grid = get_copy_grid()
  for row in range(9):
   for col in range(9):
-    if copy_grid[row][col] == 0:
+    if grid[row][col] == 0:
      board[row][col].delete(0, END)
      cell = cells[(row, col)]
      cell.delete(0, END)
- grid = copy_grid
 
 def emptyCell():
  for row in range(9):
@@ -206,7 +211,6 @@ def isValidSudoku(board):
         unique[m] = False
       for k in range(0, 3):
         for l in range(0, 3):
-           
           X = i + k
           Y = j + l
           Z = board[X][Y]
@@ -218,7 +222,7 @@ def isValidSudoku(board):
   return True
 
 def check_sudoku():
- print(grid)
+ global grid
  for row in range(9):
   for col in range(9):
     if grid[row][col] == 0:
@@ -227,12 +231,12 @@ def check_sudoku():
       grid[row][col] = 0
      else:
       grid[row][col] = (int(val))
- print(grid)
  if isValidSudoku(grid) == True :
   messagebox.askyesno("Valid Sudoku", message )
   sudoku_game()
  else:
-  messagebox.showwarning("Warning Invalid Sudoku", message)  
+  messagebox.showwarning("Warning Invalid Sudoku", message) 
+  grid = get_copy_grid() 
   
 def add_butoane(game_grid):
  butoane = Frame(game_grid, bg='white')
@@ -242,17 +246,13 @@ def add_butoane(game_grid):
  button_check = Button(butoane, text ="Check",  width = 50, font = 'summer, 20',command=check_sudoku, bd = 5)
  button_check.pack()
 
-
 def callback(input):
  regex = '[1-9]'
- print(cells)
  if re.search(regex,input):
   return True
  else:
-    print(input)
     messagebox.showerror("Incorrect Input", "Enter numbers ONLY!")
     return False
-
 
 def desenat_sudoku(game_grid):
  global puzzle
@@ -272,18 +272,17 @@ def desenat_sudoku(game_grid):
    elif (row >= 3 and row < 6) and (col >=3 and col < 6):
       color = 'white'
    else:
-      color = 'grey'
+      color = 'red'
    if grid[row][col] == 0:
     board[row][col] = Entry(puzzle, width = 2, font = ('Arial', 20), bg = color, cursor = 'arrow', borderwidth = 2,
-                      highlightcolor = 'yellow',highlightthickness = 0, highlightbackground = 'black') 
+                      highlightcolor = 'yellow',highlightthickness = 1, highlightbackground = 'black') 
     reg = puzzle.register(callback)
     board[row][col].config(validate ='key', validatecommand =(reg, '%S'))
     cells[(row, col)] = board[row][col]
    else:
     board[row][col] = Label(puzzle, width = 2, font = ('Arial', 20), bg = color, cursor = 'arrow', borderwidth = 2,
-                      highlightcolor = 'yellow', highlightthickness = 0, highlightbackground = 'black',text=copy_grid[row][col]) 
+                      highlightcolor = 'yellow', highlightthickness = 1, highlightbackground = 'black',text=str(grid[row][col])) 
    board[row][col].grid(row = row, column = col)
-
 
 def start_countdown():
  global temp
@@ -297,11 +296,9 @@ def start_countdown():
    game_grid.destroy()
    start_menu()
 
-def start_game_2():
+def start_game():
   window.destroy()
   generare_sudoku_rezolvabil()
-  global copy_grid
-  copy_grid = grid
   global game_grid
   game_grid = Tk()
   game_grid.title("Sudoku")
@@ -355,13 +352,13 @@ def start_menu():
  global window
  window = Tk()
  window.title("Sudoku")
- window.geometry("500x500")
- label1 = Label(window, text="Sudoku", font="arial, 50",width=10, height=2, borderwidth=3, relief="flat")
- button_start = Button(window, text ="Start", command =start_game_2, width = 500, font = 'summer, 25', bd = 10)
- label2= Label(window, text = "Select the difficulty below :  ", font = ("Times New Roman", 30), padx = 10, pady = 10)
- R1 = Radiobutton(window, text="Easy",background="white", activebackground="red",indicatoron = 0,font=30,command=update_label1)
- R2 = Radiobutton(window, text="Medium",background="white", activebackground="red",indicatoron = 0,font=30,command=update_label2)
- R3 = Radiobutton(window, text="Hard",background="white", activebackground="red",indicatoron = 0,font=30,command=update_label3)
+ window.geometry("550x550")
+ label1 = Label(window, text="Sudoku", font="arial, 65",width=10, height=2, borderwidth=3, relief="flat")
+ button_start = Button(window, text ="Start", command =start_game, width = 500, font = 'summer, 40', bd = 10)
+ label2= Label(window, text = "Select the difficulty below :  ", font = ("Times New Roman", 35), padx = 10, pady = 10)
+ R1 = Radiobutton(window, text="Easy",background="white", activebackground="red",indicatoron = 0,font=40,command=update_label1)
+ R2 = Radiobutton(window, text="Medium",background="white", activebackground="red",indicatoron = 0,font=40,command=update_label2)
+ R3 = Radiobutton(window, text="Hard",background="white", activebackground="red",indicatoron = 0,font=40,command=update_label3)
  label1.pack()
  button_start.pack()
  label2.pack()
