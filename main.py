@@ -248,13 +248,18 @@ def creare_matrice_string():
   string_mat.append(strs)
  print(string_mat)
 
+
 def callback(input):
  regex = '[1-9]'
- 
  if re.search(regex,input):
-    #print(input)
-    grid[row][col]=int(input)
+  if grid[row][col] == 0:
+    grid[row][col] = int(input)
     return True
+  else:
+    grid[row][col] = 0
+    board[row][col].delete(0, END)
+    messagebox.showerror("Incorrect Input", "Enter numbers between 1-9 ONLY!")
+    return False
  else:
     print(input)
     messagebox.showerror("Incorrect Input", "Enter numbers ONLY!")
@@ -278,11 +283,9 @@ def desenat_sudoku(game_grid):
       color = 'white'
    else:
       color = 'grey'
-   global var
-   var = StringVar()
    if grid[row][col] == 0:
     board[row][col] = Entry(puzzle, width = 2, font = ('Arial', 20), bg = color, cursor = 'arrow', borderwidth = 2,
-                      highlightcolor = 'yellow',textvariable = var, highlightthickness = 0, highlightbackground = 'black') 
+                      highlightcolor = 'yellow',highlightthickness = 0, highlightbackground = 'black') 
     reg = puzzle.register(callback)
     board[row][col].config(validate ='key', validatecommand =(reg, '%S'))
    else:
