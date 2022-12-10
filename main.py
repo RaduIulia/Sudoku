@@ -145,17 +145,13 @@ def setare_valori_timer(minute,second):
   second.set("15")
  set_temp(minute,second)
 
-def grid_checker():
- for row in range(9):
-  for col in range(9):
-    if board[row][col].get() not in ['1','2','3','4','5','6','7','8','9']:
-        board[row][col].set('')
-
 def clear():
  for row in range(9):
   for col in range(9):
     if copy_grid[row][col] == 0:
      board[row][col].delete(0, END)
+     cell = cells[(row, col)]
+     cell.delete(0, END)
  grid = copy_grid
 
 def emptyCell():
@@ -167,6 +163,8 @@ def emptyCell():
 
 def isValidSudoku(board):
   N = 9
+  ok_gol = 0
+  ok_interval = 0
   global message
   message = ""
   for i in range(0, N):
@@ -174,11 +172,15 @@ def isValidSudoku(board):
       if ((board[i][j] <= 0) or
           (board[i][j] > 9)):
         if board[i][j] == 0:
-          message = "Empty Cells"
-          return False
+          ok_gol = 1
         else:
-          message = "Values out of 1-9 interval"
-          return False
+          ok_interval = 1
+  if ok_gol == 1:
+   message = message + "Empty Cells! "
+  if ok_interval == 1:
+   message = message + "Values out of 1-9 interval!"
+  if ok_interval or ok_gol:
+    return False
   unique = [False] * (N + 1)
   for i in range(0, N):
     for m in range(0, N + 1):
@@ -188,24 +190,18 @@ def isValidSudoku(board):
       if (unique[Z] == True):
         message = "Duplicates on row "+str(i)
         return False
-       
       unique[Z] = True
- 
   for i in range(0, N):
     for m in range(0, N + 1):
       unique[m] = False
     for j in range(0, N):
-       
       Z = board[j][i]
       if (unique[Z] == True):
         message = "Duplicates on column "+str(j)
         return False
-       
       unique[Z] = True
- 
   for i in range(0, N - 2, 3):
     for j in range(0, N - 2, 3):
-       
       for m in range(0, N + 1):
         unique[m] = False
       for k in range(0, 3):
@@ -217,17 +213,23 @@ def isValidSudoku(board):
           if (unique[Z] == True):
             message = "Duplicates in block"
             return False
-           
           unique[Z] = True
   message = "You've solved Sudoku, congratulations!"
   return True
 
 def check_sudoku():
  print(grid)
- print(isValidSudoku(grid))
- print(message)
+ for row in range(9):
+  for col in range(9):
+    if grid[row][col] == 0:
+     val = cells[(row, col)].get()
+     if val == "":
+      grid[row][col] = 0
+     else:
+      grid[row][col] = (int(val))
+ print(grid)
  if isValidSudoku(grid) == True :
-  messagebox.askyesno("Valid Sudoku", message + " Do you want to play again?")
+  messagebox.askyesno("Valid Sudoku", message )
   sudoku_game()
  else:
   messagebox.showwarning("Warning Invalid Sudoku", message)  
@@ -240,26 +242,12 @@ def add_butoane(game_grid):
  button_check = Button(butoane, text ="Check",  width = 50, font = 'summer, 20',command=check_sudoku, bd = 5)
  button_check.pack()
 
-def creare_matrice_string():
- global string_mat
- string_mat = []
- strs = ["" for x in range(9)]
- for x in range(9):
-  string_mat.append(strs)
- print(string_mat)
-
 
 def callback(input):
  regex = '[1-9]'
+ print(cells)
  if re.search(regex,input):
-  if grid[row][col] == 0:
-    grid[row][col] = int(input)
-    return True
-  else:
-    grid[row][col] = 0
-    board[row][col].delete(0, END)
-    messagebox.showerror("Incorrect Input", "Enter numbers between 1-9 ONLY!")
-    return False
+  return True
  else:
     print(input)
     messagebox.showerror("Incorrect Input", "Enter numbers ONLY!")
@@ -273,7 +261,9 @@ def desenat_sudoku(game_grid):
  global board
  board  = []
  for i in range(1,10):
-           board += [[0,0,0,0,0,0,0,0,0]]
+  board += [[0,0,0,0,0,0,0,0,0]]
+ global cells
+ cells = {}
  global row,col
  for row in range(9):
   for col in range(9):
@@ -288,6 +278,7 @@ def desenat_sudoku(game_grid):
                       highlightcolor = 'yellow',highlightthickness = 0, highlightbackground = 'black') 
     reg = puzzle.register(callback)
     board[row][col].config(validate ='key', validatecommand =(reg, '%S'))
+    cells[(row, col)] = board[row][col]
    else:
     board[row][col] = Label(puzzle, width = 2, font = ('Arial', 20), bg = color, cursor = 'arrow', borderwidth = 2,
                       highlightcolor = 'yellow', highlightthickness = 0, highlightbackground = 'black',text=copy_grid[row][col]) 
@@ -308,7 +299,6 @@ def start_countdown():
 
 def start_game_2():
   window.destroy()
-  creare_matrice_string()
   generare_sudoku_rezolvabil()
   global copy_grid
   copy_grid = grid
@@ -378,7 +368,6 @@ def start_menu():
  R1.pack()
  R2.pack()
  R3.pack()
- creare_matrice_string()
  add_label()
  window.mainloop()
 
