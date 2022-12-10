@@ -2,7 +2,6 @@ from tkinter import *
 from random import randint, shuffle
 import time
 from tkinter import messagebox
-from functools import partial
 import re 
 import threading
 
@@ -130,6 +129,10 @@ def generare_sudoku_rezolvabil():
 def set_temp(minute,second):
   global temp
   temp = int(minute.get())*60 + int(second.get())
+
+def get_temp():
+  global temp
+  return temp
   
 def setare_valori_timer(minute,second):
  if get_variabila_dificultate() == 1:
@@ -155,36 +158,6 @@ def clear():
     if copy_grid[row][col] == 0:
      board[row][col].delete(0, END)
  grid = copy_grid
-
-def refresh(self):
-    self.destroy()
-    self.__init__()
-
-def cd(timer_label_obj,de_distrus):
- global temp,game_end
- while temp > 0:
-  timer_label_obj.config(text="Sudoku Time Remaining: "+str(temp),font=("Arial", 25))
-  temp-=1
-  timer_label_obj.pack()
-  time.sleep(1)
-  if temp ==0:
-   game_end = True
-   timer_label_obj.destroy()
-   messagebox.showinfo("Time's up", "You didn't finish the Sudoku in time!")
-  print(game_end)
-  if game_end == True:
-    sudoku_game()
-
-def countdown(timerFrame,de_distrus):
- timer = Label(timerFrame)
- th = threading.Thread(target=cd,args=[timer,de_distrus])
- th.start()
-
-def add_label_timer(game_grid):
- timer = Frame(game_grid, bg='white')
- timer.pack()
- countdown(timer,game_grid)
- 
 
 def emptyCell():
  for row in range(9):
@@ -255,11 +228,11 @@ def check_sudoku():
  print(isValidSudoku(grid))
  print(message)
  if isValidSudoku(grid) == True :
-  messagebox.showinfo("Valid Sudoku", message)
+  messagebox.askyesno("Valid Sudoku", message + " Do you want to play again?")
+  sudoku_game()
  else:
-  messagebox.showinfo("Invalid Sudoku", message)
-
- 
+  messagebox.showwarning("Warning Invalid Sudoku", message)  
+  
 def add_butoane(game_grid):
  butoane = Frame(game_grid, bg='white')
  butoane.pack()
@@ -276,7 +249,7 @@ def callback(input):
     return True
  else:
     print(input)
-    messagebox.showinfo("Incorrect Input", "Enter numbers ONLY!")
+    messagebox.showerror("Incorrect Input", "Enter numbers ONLY!")
     return False
 
 
@@ -307,24 +280,39 @@ def desenat_sudoku(game_grid):
                       highlightcolor = 'yellow', highlightthickness = 0, highlightbackground = 'black',text=copy_grid[row][col]) 
    board[row][col].grid(row = row, column = col)
 
-def start_game(game_grid):
- generare_sudoku_rezolvabil()
- global game_end
- game_end = False
- global copy_grid
- copy_grid = grid
- game_grid.destroy()
- game_grid = Tk()
- game_grid.title("Sudoku")
- game_grid.geometry("500x500")
- global minute,second
- minute=StringVar()
- second=StringVar()
- setare_valori_timer(minute,second)
- add_label_timer(game_grid)
- desenat_sudoku(game_grid)
- add_butoane(game_grid)
- game_grid.mainloop()
+def start_countdown():
+ global temp
+ if temp >= 0:
+  time_left.config(text = "Game Ends in : " + str(temp) + "s")
+  temp -= 1
+  time_left.after(1000,start_countdown)
+  if (temp == -1):
+   messagebox.showerror("Time's up", "You didn't finish the Sudoku in time!")
+   time_left.config(text="Game Over!!!")
+   game_grid.destroy()
+   start_menu()
+
+def start_game_2():
+  window.destroy()
+  generare_sudoku_rezolvabil()
+  global copy_grid
+  copy_grid = grid
+  global game_grid
+  game_grid = Tk()
+  game_grid.title("Sudoku")
+  game_grid.geometry("550x550")
+  label_game=Label(game_grid, text="Sudoku Game", font=('Aerial 18'))
+  label_game.pack()
+  minute=StringVar()
+  second=StringVar()
+  setare_valori_timer(minute,second)
+  desenat_sudoku(game_grid)
+  add_butoane(game_grid)
+  global time_left
+  time_left = Label(game_grid, text = "Game Ends in : -", font=('Aerial 18'), fg = "red")
+  time_left.pack()
+  if temp == get_temp():
+   start_countdown()
 
 def setare_variabila_dificultate(x):
  global dificultate
@@ -358,10 +346,9 @@ def start_menu():
  global window
  window = Tk()
  window.title("Sudoku")
- game = partial(start_game, window)
  window.geometry("500x500")
  label1 = Label(window, text="Sudoku", font="arial, 50",width=10, height=2, borderwidth=3, relief="flat")
- button_start = Button(window, text ="Start", command = game, width = 500, font = 'summer, 25', bd = 10)
+ button_start = Button(window, text ="Start", command =start_game_2, width = 500, font = 'summer, 25', bd = 10)
  label2= Label(window, text = "Select the difficulty below :  ", font = ("Times New Roman", 30), padx = 10, pady = 10)
  R1 = Radiobutton(window, text="Easy",background="white", activebackground="red",indicatoron = 0,font=30,command=update_label1)
  R2 = Radiobutton(window, text="Medium",background="white", activebackground="red",indicatoron = 0,font=30,command=update_label2)
